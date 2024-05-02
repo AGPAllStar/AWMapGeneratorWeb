@@ -20,12 +20,8 @@ class EstadoGameLayer {
     marcarCasilla(casilla) {
         
     }
+    
+    dibujar(scrollX) {
 
-    dibujarRangoDeAccion() {
-        
-    }
-
-    dibujarCasillasMarcadas() {
-        
     }
 }

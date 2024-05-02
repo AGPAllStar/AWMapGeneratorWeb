@@ -1,13 +1,13 @@
 class Building extends GroundWithBackgroundTerrain {
 
-    constructor(rutaImagen, x, y, defenseLevel, playerOwner) {
+    constructor(rutaImagen, x, y, defenseLevel, playerOwnerId) {
         super(rutaImagen, x, y, defenseLevel);
-        this.playerOwner = playerOwner;
+        this.playerOwnerId = playerOwnerId;
         this.conquerAvailable = true;
     }
 
     beConquered(playerId) {
-        this.playerOwner = playerId;
+        this.playerOwnerId = playerId;
         this.conquerAvailable = false;
         return true;
     }

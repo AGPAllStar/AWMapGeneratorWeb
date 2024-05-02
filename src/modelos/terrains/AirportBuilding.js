@@ -1,15 +1,15 @@
 class AirportBuilding extends Building {
 
-    constructor(x, y, playerOwner) {
+    constructor(x, y, playerOwnerId) {
         var image = null;
-        if(playerOwner == 1){
+        if(playerOwnerId == 1){
             image = imagenes.edificio_aeropuerto_j1;
-        }else if(playerOwner == 2) {
+        }else if(playerOwnerId == 2) {
             image = imagenes.edificio_aeropuerto_j2;
         }else{
             image = imagenes.edificio_aeropuerto;
         }
-        super(image, x, y, 3, playerOwner);
+        super(image, x, y, 3, playerOwnerId);
     }
 
     beConquered(playerId) {

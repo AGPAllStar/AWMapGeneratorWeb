@@ -9,7 +9,8 @@ class EstadoAtaquePreparado extends EstadoGameLayer {
         this.gameLayer.estado = new EstadoAtaqueCasillaMarcada(this.gameLayer, this.casillaMarcada,  casilla); 
     }
 
-    dibujarRangoDeAccion() {
+    dibujar(scrollX) {
+        this.imagenCasillaMarcada.dibujar(scrollX);
         if(this.rangoDeAccion == null) {
             var casillas = this.gameLayer.game.getReachableTilesAttacking(this.casillaMarcada);
             this.rangoDeAccion = new Array();
@@ -19,11 +20,7 @@ class EstadoAtaquePreparado extends EstadoGameLayer {
             }
         }
         for(let i = 0;i < this.rangoDeAccion.length;i++) {
-            this.rangoDeAccion[i].dibujar(this.gameLayer.scrollX);
+            this.rangoDeAccion[i].dibujar(scrollX);
         }
-    }
-
-    dibujarCasillasMarcadas() {
-        this.imagenCasillaMarcada.dibujar(this.gameLayer.scrollX);
     }
 }

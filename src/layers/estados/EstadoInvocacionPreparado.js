@@ -11,7 +11,7 @@ class EstadoInvocacionPreparado extends EstadoGameLayer {
         var listTexts = new Array();
         var ySum = 0;
         if(this.gameLayer.game.checkInvokeIsAvailable(this.casillaMarcada)) {
-            if(this.casillaMarcada instanceof BaseBuilding) {
+            if(this.casillaMarcada instanceof FactoryBuilding) {
                 if(this.gameLayer.game.actualPlayer.money >= 1000) {
                     listOptions.push(new Boton(imagenes.boton_opcion, this.casillaMarcada.x + 48, this.casillaMarcada.y + ySum + 16));
                     listFunctions.push(this.gameLayer.invocarInfanteria);
@@ -45,7 +45,7 @@ class EstadoInvocacionPreparado extends EstadoGameLayer {
         return [listOptions, listFunctions, listTexts];
     }
 
-    dibujarCasillasMarcadas() {
-        this.imagenCasillaMarcada.dibujar(this.gameLayer.scrollX);
+    dibujar(scrollX) {
+        this.imagenCasillaMarcada.dibujar(scrollX);
     }
 }

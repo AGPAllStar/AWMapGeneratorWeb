@@ -30,7 +30,7 @@ class GameLayer extends Layer {
 
         if(this.game.isGameFinished()) {
             this.estado = new EstadoJuegoFinalizado(this);
-            this.mensajeGanador = new Texto("Ha ganado el J" + this.game.getWinner(), 480*0.65,320*0.50);
+            this.obtenerOpcionesDeMenu();
         }
 
         this.mensaje = new Boton(imagenes.mensaje_ganar, 480/2, 320/2);
@@ -51,8 +51,7 @@ class GameLayer extends Layer {
         }
         
         // HUD
-        this.estado.dibujarCasillasMarcadas();
-        this.estado.dibujarRangoDeAccion();
+        this.estado.dibujar(this.scrollX);
         
         for(var i = 0;i < this.opcionesDeMenu.length;i++) {
             this.opcionesDeMenu[i].dibujar(this.scrollX);
@@ -65,9 +64,6 @@ class GameLayer extends Layer {
         this.fondoPuntos.dibujar();
         this.dinero.dibujar();
         this.jugadorActivo.dibujar();
-        if(this.mensajeGanador != null) {
-            this.mensajeGanador.dibujar();
-        }
         if ( this.pausa ) {
             this.mensaje.dibujar();
         }

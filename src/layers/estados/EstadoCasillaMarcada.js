@@ -49,7 +49,7 @@ class EstadoCasillaMarcada extends EstadoGameLayer {
         this.gameLayer.estado = new EstadoCasillaMarcada(this.gameLayer,  casilla);
     }
 
-    dibujarCasillasMarcadas() {
-        this.imagenCasillaMarcada.dibujar(this.gameLayer.scrollX);
+    dibujar(scrollX) {
+        this.imagenCasillaMarcada.dibujar(scrollX);
     }
 }

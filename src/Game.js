@@ -5,11 +5,11 @@ const TILE_MOUNTAIN = "^";
 const TILE_ROAD = "=";
 const TILE_CITY = "$";
 const TILE_AIRPORT = "&";
-const TILE_BASE = "+";
+const TILE_FACTORY = "+";
 const TILE_HQ_J1 = "o";
 const TILE_HQ_J2 = "O";
-const TILE_BASE_J1 = "e";
-const TILE_BASE_J2 = "E";
+const TILE_FACTORY_J1 = "e";
+const TILE_FACTORY_J2 = "E";
 const TILE_CITY_J1 = "i";
 const TILE_CITY_J2 = "I";
 const TILE_AIRPORT_J1 = "a";
@@ -80,10 +80,10 @@ class Game {
         if(!this.checkConquerIsAvailable(building)){
             return false;
         }
-        var previousPlayerOwner = building.playerOwner;
+        var previousplayerOwnerId = building.playerOwnerId;
         var result = building.beConquered(this.actualPlayer.id);
         if(result == true && building instanceof HQBuilding){
-            this.playersLost[previousPlayerOwner - 1] = true;
+            this.playersLost[previousplayerOwnerId - 1] = true;
         }
         return true;
     }
@@ -157,7 +157,7 @@ class Game {
     getMoneyForCities() {
         for(let row = 0;row < this.map.length;row++){
             for(let col = 0;col < this.map[row].length;col++){
-                if(this.map[row][col] instanceof CityBuilding && this.map[row][col].playerOwner == this.actualPlayer.id){
+                if(this.map[row][col] instanceof CityBuilding && this.map[row][col].playerOwnerId == this.actualPlayer.id){
                     this.actualPlayer.money += 1000;
                 }
             }
@@ -218,49 +218,13 @@ class Game {
         return visited;
     }
 
-    isReachableMoving(init, end, troop) {
-        var visited = new Set();
-        var tail = [[init, 0]];
-        var movements = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-    
-        while (tail.length > 0) {
-            var [[x, y], distance] = tail.shift();
-    
-            if (x == end[0] && y == end[1]) {
-                return distance;
-            }
-    
-            for (var [dx, dy] of movements) {
-                var newX = x + dx;
-                var newY = y + dy;
-    
-                if (newX >= 0 && newX < this.map.length && newY >= 0 && newY < this.map[0].length && this.map[newX][newY].canTroopPassThrough(troop) && !visited.has(`${newX},${newY}`) && distance < troop.range) {
-                    tail.push([[newX, newY], distance + 1]);
-                    visited.add(`${newX},${newY}`);
-                }
-            }
-        }
-    
-        return null;
-    }
-
-    isReachableAttacking(init, end, troop) {
-        if(init[0] < 0 || init[0] >= this.map.length || end[0] < 0 || end[0] >= this.map.length || init[1] < 0 || init[1] >= this.map[0].length || end[1] < 0 || end[1] >= this.map[0].length) {
-            return false;
-        }
-        var distance = Math.abs(end[0] - init[0]) + Math.abs(end[1] - init[1]);
-        return distance <= troop.reach;
-    }
-
     checkMoveIsAvailable(selectedTileInGame) {
         return selectedTileInGame != null && selectedTileInGame.troop != null && selectedTileInGame.troop.playerId == this.actualPlayer.id && selectedTileInGame.troop.moveAvailable;
     }
 
     checkMoveCanBeDone(initSelectedTileInGame, endSelectedTileInGame) {
-        var initBuildingCoords = this.getCoordsOfTileInMap(initSelectedTileInGame);
-        var endBuildingCoords = this.getCoordsOfTileInMap(endSelectedTileInGame);
         return this.checkMoveIsAvailable(initSelectedTileInGame) && endSelectedTileInGame.troop == null
-            && this.isReachableMoving([initBuildingCoords.row, initBuildingCoords.col], [endBuildingCoords.row, endBuildingCoords.col], initSelectedTileInGame.troop) != null;
+            && this.getReachableTilesMoving(initSelectedTileInGame).has(endSelectedTileInGame);
     }
 
     checkAttackIsAvailable(selectedTileInGame) {
@@ -268,18 +232,16 @@ class Game {
     }
 
     checkAttackCanBeDone(initSelectedTileInGame, endSelectedTileInGame) {
-        var initBuildingCoords = this.getCoordsOfTileInMap(initSelectedTileInGame);
-        var endBuildingCoords = this.getCoordsOfTileInMap(endSelectedTileInGame);
         return this.checkAttackIsAvailable(initSelectedTileInGame) && endSelectedTileInGame.troop != null && endSelectedTileInGame.troop.playerId != this.actualPlayer.id
-            && this.isReachableAttacking([initBuildingCoords.row, initBuildingCoords.col], [endBuildingCoords.row, endBuildingCoords.col], initSelectedTileInGame.troop);
+            && this.getReachableTilesAttacking(initSelectedTileInGame).has(endSelectedTileInGame);
     }
 
     checkConquerIsAvailable(selectedTileInGame) {
-        return selectedTileInGame instanceof Building && selectedTileInGame.troop != null && selectedTileInGame.playerOwner != this.actualPlayer.id && selectedTileInGame.troop.playerId == this.actualPlayer.id && selectedTileInGame.conquerAvailable;
+        return selectedTileInGame instanceof Building && selectedTileInGame.troop != null && selectedTileInGame.playerOwnerId != this.actualPlayer.id && selectedTileInGame.troop.playerId == this.actualPlayer.id && selectedTileInGame.conquerAvailable;
     }
 
     checkInvokeIsAvailable(selectedTileInGame) {
-        return (selectedTileInGame instanceof BaseBuilding || selectedTileInGame instanceof AirportBuilding) && selectedTileInGame.playerOwner == this.actualPlayer.id && selectedTileInGame.troop == null;
+        return (selectedTileInGame instanceof FactoryBuilding || selectedTileInGame instanceof AirportBuilding) && selectedTileInGame.playerOwnerId == this.actualPlayer.id && selectedTileInGame.troop == null;
     }
 
     convertMap(arrayStrMap){
@@ -299,12 +261,12 @@ class Game {
                     arrayRow.push(new MountainTerrain(x, y));
                 }else if(arrayStrMap[row][col] == TILE_ROAD){
                     arrayRow.push(new RoadTerrain(x, y));
-                }else if(arrayStrMap[row][col] == TILE_BASE){
-                    arrayRow.push(new BaseBuilding(x, y, -1));
-                }else if(arrayStrMap[row][col] == TILE_BASE_J1){
-                    arrayRow.push(new BaseBuilding(x, y, 1));
-                }else if(arrayStrMap[row][col] == TILE_BASE_J2){
-                    arrayRow.push(new BaseBuilding(x, y, 2));
+                }else if(arrayStrMap[row][col] == TILE_FACTORY){
+                    arrayRow.push(new FactoryBuilding(x, y, -1));
+                }else if(arrayStrMap[row][col] == TILE_FACTORY_J1){
+                    arrayRow.push(new FactoryBuilding(x, y, 1));
+                }else if(arrayStrMap[row][col] == TILE_FACTORY_J2){
+                    arrayRow.push(new FactoryBuilding(x, y, 2));
                 }else if(arrayStrMap[row][col] == TILE_CITY){
                     arrayRow.push(new CityBuilding(x, y, -1));
                 }else if(arrayStrMap[row][col] == TILE_CITY_J1){

@@ -15,10 +15,9 @@ class Troop extends Modelo{
 
     attack(enemyTerrain, game) {
         var allyTerrain = game.getTileOfTroop(this);
-        var allyTerrainCoords = game.getCoordsOfTileInMap(allyTerrain);
-        var enemyTerrainCoords = game.getCoordsOfTileInMap(enemyTerrain);
         var enemyTroop = enemyTerrain.troop;
-        if(enemyTroop == null || !game.isReachableAttacking([allyTerrainCoords.row, allyTerrainCoords.col], [enemyTerrainCoords.row, enemyTerrainCoords.col], this) || !this.attackAvailable){
+        var tilesReachableAttacking = game.getReachableTilesAttacking(allyTerrain);
+        if(enemyTroop == null || !tilesReachableAttacking.has(enemyTerrain) || !this.attackAvailable){
             return false;
         }
         var lifeToLose =  Math.ceil(this.life * (MAX_TROOP_LIFE/enemyTroop.life) / enemyTerrain.defenseLevel);
@@ -61,12 +60,16 @@ class Troop extends Modelo{
             return false;
         }
         var initTile = game.getTileOfTroop(this);
-        initTile.troop = null;
-        game.map[x][y].troop = this;
-        this.moveAvailable = false;
-        this.x = game.map[x][y].x;
-        this.y = game.map[x][y].y;
-        return true;
+        var tilesReachableMoving = game.getReachableTilesMoving(initTile);
+        if(tilesReachableMoving.has(game.map[x][y])){
+            initTile.troop = null;
+            game.map[x][y].troop = this;
+            this.moveAvailable = false;
+            this.x = game.map[x][y].x;
+            this.y = game.map[x][y].y;
+            return true;
+        }
+        return false;
     }
 
     dibujar(scrollX) {
