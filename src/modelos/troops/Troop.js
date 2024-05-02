@@ -67,6 +67,10 @@ class Troop extends Modelo{
             this.moveAvailable = false;
             this.x = game.map[x][y].x;
             this.y = game.map[x][y].y;
+            if(this.imagenVida != null){
+                this.imagenVida.x = this.x;
+                this.imagenVida.y = this.y;
+            }
             return true;
         }
         return false;
